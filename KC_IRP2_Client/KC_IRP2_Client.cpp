@@ -9,6 +9,13 @@
 
 using namespace std;
 
+void getServerResponse(const SOCKET& server_socket) {
+	char buf[500];
+	memset(&buf[0], 0, sizeof(buf));
+	recv(server_socket, buf, sizeof(buf), 0);
+	string result = buf;
+	cout << "Server response: " << endl << result << endl;
+}
 void main() {
 	WORD wVersionRequested;
 	WSADATA wsaData;
@@ -52,19 +59,38 @@ void main() {
 			printf("\nEnter author name: ");
 			fgets(buf, sizeof(buf), stdin);
 			send(server_socket, buf, sizeof(buf), 0);
-			memset(&buf[0], 0, sizeof(buf));
-			recv(server_socket, buf, sizeof(buf), 0);
-			result = buf;
-			result.pop_back();
-			cout << "Books of author: " << endl << result << endl;
+			cout << "Books of author: " << endl;
+			getServerResponse(server_socket);
 			break;
 		case '2'://просмотреть все книги
 			memset(&buf[0], 0, sizeof(buf));
 			//получаем список всех книг
-			recv(server_socket, buf, sizeof(buf), 0);
-			result = buf;
-			result.pop_back();
-			cout << "All books:" << endl << result << endl;
+			cout << "All books:" << endl;
+			getServerResponse(server_socket);
+			break;
+		//case '3'://отредактировать запись
+		//	printf("\nEnter record number to edit: ");
+		//	memset(&buf[0], 0, sizeof(buf));
+		//	fgets(buf, sizeof(buf), stdin);
+		//	send(server_socket, buf, sizeof(buf), 0);
+		//	memset(&buf[0], 0, sizeof(buf));
+		//	recv(server_socket, buf, sizeof(buf), 0);
+		//	if (buf[0] == -1) {
+		//		cout << "Record with given index does not exist" << endl;
+		//		break;
+		//	}
+		//	else {
+		//		
+		//	}
+		//	break;
+		case '4':
+			printf("\nEnter book index to delete: ");
+			memset(&buf[0], 0, sizeof(buf));
+			fgets(buf, sizeof(buf), stdin);
+
+			send(server_socket, buf, sizeof(buf), 0);
+			
+			getServerResponse(server_socket);
 			break;
 		default:
 			closesocket(server_socket);
