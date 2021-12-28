@@ -50,7 +50,7 @@ void main() {
 		puts("\nChoose:\n");
 		puts("1 - Search books by author");
 		puts("2 - View all");
-		puts("3 - Edit");
+		puts("3 - Add book");
 		puts("4 - Delete book by index");
 		puts("5 - Exit\n");
 		printf("Input: ");
