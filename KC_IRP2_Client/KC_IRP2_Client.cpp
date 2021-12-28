@@ -9,12 +9,20 @@
 
 using namespace std;
 
-void getServerResponse(const SOCKET& server_socket) {
+void getServerResponse(const SOCKET& server_socket, const string& message) {
 	char buf[500];
 	memset(&buf[0], 0, sizeof(buf));
 	recv(server_socket, buf, sizeof(buf), 0);
 	string result = buf;
-	cout << "Server response: " << endl << result << endl;
+	cout << message << endl << result << endl;
+}
+
+void sendUserInput(const SOCKET& server_socket, const string& message) {
+	char buf[256];
+	memset(&buf[0], 0, sizeof(buf));
+	cout << message << endl;
+	fgets(buf, sizeof(buf), stdin);
+	send(server_socket, buf, sizeof(buf), 0);
 }
 void main() {
 	WORD wVersionRequested;
@@ -43,54 +51,36 @@ void main() {
 		puts("1 - Search books by author");
 		puts("2 - View all");
 		puts("3 - Edit");
-		puts("4 - Add");
+		puts("4 - Delete book by index");
 		puts("5 - Exit\n");
 		printf("Input: ");
 
 		memset(&buf[0], 0, sizeof(buf));
 		fgets(buf, sizeof(buf), stdin);
-		buf[1] = '\0';
 		send(server_socket, buf, sizeof(buf), 0);
 		main_menu_choise = buf[0];
 
 		switch (main_menu_choise) {
 		case '1'://поиск книги по автору
-			memset(&buf[0], 0, sizeof(buf));
-			printf("\nEnter author name: ");
-			fgets(buf, sizeof(buf), stdin);
-			send(server_socket, buf, sizeof(buf), 0);
-			cout << "Books of author: " << endl;
-			getServerResponse(server_socket);
+			sendUserInput(server_socket, "Enter author name: ");
+			getServerResponse(server_socket, "Books of author: ");
 			break;
 		case '2'://просмотреть все книги
-			memset(&buf[0], 0, sizeof(buf));
 			//получаем список всех книг
-			cout << "All books:" << endl;
-			getServerResponse(server_socket);
+			getServerResponse(server_socket, "All books: ");
 			break;
-		//case '3'://отредактировать запись
-		//	printf("\nEnter record number to edit: ");
-		//	memset(&buf[0], 0, sizeof(buf));
-		//	fgets(buf, sizeof(buf), stdin);
-		//	send(server_socket, buf, sizeof(buf), 0);
-		//	memset(&buf[0], 0, sizeof(buf));
-		//	recv(server_socket, buf, sizeof(buf), 0);
-		//	if (buf[0] == -1) {
-		//		cout << "Record with given index does not exist" << endl;
-		//		break;
-		//	}
-		//	else {
-		//		
-		//	}
-		//	break;
-		case '4':
-			printf("\nEnter book index to delete: ");
-			memset(&buf[0], 0, sizeof(buf));
-			fgets(buf, sizeof(buf), stdin);
+		case '3'://добавить запись
+			sendUserInput(server_socket, "Enter registration number:");
+			sendUserInput(server_socket, "Enter author:");
+			sendUserInput(server_socket, "Enter book name:");
+			sendUserInput(server_socket, "Enter year pushlished:");
+			sendUserInput(server_socket, "Enter number of pages:");
 
-			send(server_socket, buf, sizeof(buf), 0);
-			
-			getServerResponse(server_socket);
+			getServerResponse(server_socket, "Result of adding");
+			break;
+		case '4'://удалить запись
+			sendUserInput(server_socket, "Enter book index to delete:");
+			getServerResponse(server_socket, "Result of deletion:");
 			break;
 		default:
 			closesocket(server_socket);
