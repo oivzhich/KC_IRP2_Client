@@ -17,12 +17,13 @@ void getServerResponse(const SOCKET& server_socket, const string& message) {
 	cout << message << endl << result << endl;
 }
 
-void sendUserInput(const SOCKET& server_socket, const string& message) {
+string sendUserInput(const SOCKET& server_socket, const string& message) {
 	char buf[256];
 	memset(&buf[0], 0, sizeof(buf));
 	cout << message << endl;
 	fgets(buf, sizeof(buf), stdin);
 	send(server_socket, buf, sizeof(buf), 0);
+	return buf;
 }
 void main() {
 	WORD wVersionRequested;
@@ -41,10 +42,7 @@ void main() {
 	connect(server_socket, (sockaddr*)&dest_addr, sizeof(dest_addr));
 
 	while (true) {
-		char buf[500],
-			main_menu_choise,
-			switch_menu_choise;
-		string result;
+		int main_menu_choise;
 
 		//Выбор пункта меню и отправка его серверу
 		puts("\nChoose:\n");
@@ -55,36 +53,39 @@ void main() {
 		puts("5 - Exit\n");
 		printf("Input: ");
 
-		memset(&buf[0], 0, sizeof(buf));
-		fgets(buf, sizeof(buf), stdin);
-		send(server_socket, buf, sizeof(buf), 0);
-		main_menu_choise = buf[0];
+		try {
+			main_menu_choise = stoi(sendUserInput(server_socket, ""));
 
-		switch (main_menu_choise) {
-		case '1'://поиск книги по автору
-			sendUserInput(server_socket, "Enter author name: ");
-			getServerResponse(server_socket, "Books of author: ");
-			break;
-		case '2'://просмотреть все книги
-			//получаем список всех книг
-			getServerResponse(server_socket, "All books: ");
-			break;
-		case '3'://добавить запись
-			sendUserInput(server_socket, "Enter registration number:");
-			sendUserInput(server_socket, "Enter author:");
-			sendUserInput(server_socket, "Enter book name:");
-			sendUserInput(server_socket, "Enter year pushlished:");
-			sendUserInput(server_socket, "Enter number of pages:");
+			switch (main_menu_choise) {
+			case 1://поиск книги по автору
+				sendUserInput(server_socket, "Enter author name: ");
+				getServerResponse(server_socket, "Books of author: ");
+				break;
+			case 2://просмотреть все книги
+				//получаем список всех книг
+				getServerResponse(server_socket, "All books: ");
+				break;
+			case 3://добавить запись
+				sendUserInput(server_socket, "Enter registration number:");
+				sendUserInput(server_socket, "Enter author:");
+				sendUserInput(server_socket, "Enter book name:");
+				sendUserInput(server_socket, "Enter year pushlished:");
+				sendUserInput(server_socket, "Enter number of pages:");
 
-			getServerResponse(server_socket, "Result of adding");
-			break;
-		case '4'://удалить запись
-			sendUserInput(server_socket, "Enter book index to delete:");
-			getServerResponse(server_socket, "Result of deletion:");
-			break;
-		default:
-			closesocket(server_socket);
-			exit(0);
+				getServerResponse(server_socket, "Result of adding");
+				break;
+			case 4://удалить запись
+				sendUserInput(server_socket, "Enter book index to delete:");
+				getServerResponse(server_socket, "Result of deletion:");
+				break;
+			default:
+				closesocket(server_socket);
+				exit(0);
+			}
+		}
+		catch (const std::invalid_argument& e) {
+			cout << e.what() << endl;
+			cout << "Wrong main menu choice, try again";
 		}
 	}
 	WSACleanup();
